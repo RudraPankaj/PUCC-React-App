@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Michroma';
+  src: url('./assets/fonts/Michroma-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  padding: 0;
+  margin: auto;
+  font-family: "Michroma", sans-serif;
+}
+
+.footer-links a:hover {
+  color: white;
+}
