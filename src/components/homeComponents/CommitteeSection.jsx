@@ -1,10 +1,10 @@
 import React from "react";
 
 const committee = [
-  { name: "Alice Smith", position: "President", photo: "/committee/alice.jpg" },
-  { name: "Bob Johnson", position: "VP", photo: "/committee/bob.jpg" },
-  { name: "Carol Lee", position: "Treasurer", photo: "/committee/carol.jpg" },
-  { name: "David Kim", position: "Secretary", photo: "/committee/david.jpg" },
+  { name: "Alice Smith", position: "President", photo: "./src/assets/images/avatar.jpg" },
+  { name: "Bob Johnson", position: "VP", photo: "./src/assets/images/avatar.jpg" },
+  { name: "Carol Lee", position: "Treasurer", photo: "./src/assets/images/avatar.jpg" },
+  { name: "David Kim", position: "Secretary", photo: "./src/assets/images/avatar-f.jpg" },
 ];
 
 const CommitteeSection = () => {
