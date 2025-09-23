@@ -2,10 +2,10 @@ import React from "react";
 
 const AboutSection = () => {
     return (
-        <section className="flex flex-col md:flex-row items-center justify-center py-24 px-6 md:px-32 bg-gradient-to-br from-[#e0e7ff] via-[#f0f4ff] to-white rounded-3xl shadow-2xl mx-4 my-12">
+        <section className="flex flex-col md:flex-row items-center justify-center py-24 px-6 md:px-32 bg-gradient-to-br from-[#e0e7ff] via-[#f0f4ff] to-white rounded-3xl shadow-xl mx-4 my-12">
             <div className="md:w-1/2 flex justify-center">
                 <img
-                    src="./src/assets/images/about-image.jpg"
+                    src="/images/about-image.jpg"
                     alt="PUCC"
                     className="w-80 h-80 object-cover rounded-2xl shadow-xl border-4 border-white"
                 />

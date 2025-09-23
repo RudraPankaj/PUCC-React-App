@@ -6,15 +6,15 @@ const jwt = require('jsonwebtoken');
 
 // Register
 router.post('/register', async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, studentId, email, contact, gender, password, role } = req.body;
 
     try {
-        const existingUser = await User.findOne({ username });
-        if(existingUser) return res.status(400).json({ msg: "User already exists. Try with another username."});
+        const existingUser = await User.findOne({ studentId });
+        if(existingUser) return res.status(400).json({ msg: "User already exists"});
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({ username, password: hashedPassword, role });
+        const newUser = new User({ username, studentId, email, contact, gender, password: hashedPassword, role });
         await newUser.save();
 
         res.status(201).json({ msg: "User registered successfully. Redirecting to login page..." });
@@ -25,21 +25,20 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
-    const { username, password, role } = req.body;
+    const { email, password, role } = req.body;
 
     try{
-        const user = await User.findOne({ username, role });
+        const user = await User.findOne({ email, role });
         if(!user) return res.status(400).json({ msg: "User not found!" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch) return res.status(400).json({ msg: "Wrong username or password!" });
+        if(!isMatch) return res.status(400).json({ msg: "Wrong password!" });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token, user: { username: user.username, role: user.role } });
+        res.json({ token, user: { email: user.email, role: user.role } });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 module.exports = router;

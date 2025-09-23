@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-function Banner1() {
+function HeroSection() {
     return (
         <div className="relative h-[100vh] w-full overflow-hidden flex items-center justify-center bg-[#111]">
             {/* Background Image */}
@@ -14,7 +15,7 @@ function Banner1() {
                             rgba(17,17,17,0.3) 40%,
                             rgba(17,17,17,0.7) 100%
                         ),
-                        url('./src/assets/images/img2.jpg') center center/cover no-repeat
+                        url('/images/img2.jpg') center center/cover no-repeat
                     `,
                 }}
             />
@@ -40,16 +41,16 @@ function Banner1() {
                     >
                         Learn More
                     </a>
-                    <a
-                        href="#join"
+                    <Link
+                        to="/register"
                         className="bg-[#111]/80 text-white font-semibold px-8 py-3 rounded-full border border-white/40 hover:bg-[#222] transition"
                     >
                         Join Us
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>
     );
 }
 
-export default Banner1;
+export default HeroSection;

@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '/src/components/Navbar'
 import Footer from '/src/components/Footer'
 import axios from 'axios'
+import { AuthContext } from '/src/context/AuthContext.jsx'
 
 function Login() {
   
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ username: '', password: '', role: 'member' });
+  const { login } = useContext(AuthContext); // Load the login context function
+  const [formData, setFormData] = useState({ email: '', password: '', role: 'member' });
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -19,10 +21,20 @@ function Login() {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+
+      // store token and also let AuthContext know about the logged in user
       localStorage.setItem('token', res.data.token);
+
+      //backend returns { token, user: { email, role } }
+      const authPayload = {
+        user: res.data.user,
+        role: res.data.user?.role,
+        token: res.data.token,
+      };
+      login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
       navigate('/home');
     } catch (err) {
-      setError(err.response?.data?.msg || "Something went wrong");
+      setError(err.response?.data?.msg || "Database connection failed");
     }
   }
 
@@ -30,8 +42,8 @@ function Login() {
     <>
       <Navbar />
 
-      <div className="flex flex-col items-center justify-center mt-16 h-160 bg-gradient-to-br from-[#e6f1fa] to-[#b3d8f4]">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#e6f1fa] to-[#b3d8f4]">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 mt-20 mb-10">
           <h2 className="text-2xl font-bold text-center text-[#0067b6] mb-8">Club Login</h2>
 
           {error && <p className='text-red-500 text-center mb-8'>{error}</p>}
@@ -55,15 +67,15 @@ function Login() {
               ))}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
-                type="text"
-                name="username"
-                id="username"
-                value={formData.username}
+                type="email"
+                name="email"
+                id="email"
+                value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b6dfff]"
-                placeholder="Enter your username"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b6dfff] bg-[#efefef]"
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -75,7 +87,7 @@ function Login() {
                 id="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b6dfff]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b6dfff] bg-[#efefef]"
                 placeholder="Enter your password"
                 required
               />

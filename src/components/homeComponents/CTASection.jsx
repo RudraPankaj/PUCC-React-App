@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"
 
 const CTASection = () => {
   return (
@@ -9,9 +10,11 @@ const CTASection = () => {
       <p className="text-lg md:text-xl mb-6">
         Be part of a thriving tech community, improve your skills, and work on exciting projects.
       </p>
-      <button className="px-8 py-3 bg-white text-[#0067b6] font-semibold rounded-lg shadow hover:bg-gray-100 transition">
-        Become a Member
-      </button>
+      <Link to="/register">
+        <button className="px-8 py-3 bg-white text-[#0067b6] font-semibold rounded-lg shadow hover:bg-gray-100 transition cursor-pointer">
+          Become a Member
+        </button>
+      </Link>
     </section>
   );
 };
