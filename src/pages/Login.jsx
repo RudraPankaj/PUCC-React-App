@@ -8,9 +8,13 @@ import { AuthContext } from '/src/context/AuthContext.jsx'
 function Login() {
   
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // Load the login context function
+  const { isLoggedIn, login, userRole } = useContext(AuthContext); // Load the login context function
   const [formData, setFormData] = useState({ email: '', password: '', role: 'member' });
   const [error, setError] = useState('');
+
+  if(isLoggedIn) {
+    navigate('/dashboard/'+userRole)
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,14 +29,14 @@ function Login() {
       // store token and also let AuthContext know about the logged in user
       localStorage.setItem('token', res.data.token);
 
-      //backend returns { token, user: { email, role } }
+      // backend returns { token, isLoggedIn, user }
       const authPayload = {
         user: res.data.user,
         role: res.data.user?.role,
         token: res.data.token,
       };
       login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
-      navigate('/home');
+      navigate('/dashboard/'+ authPayload.role); // redirect to user dashboard
     } catch (err) {
       setError(err.response?.data?.msg || "Database connection failed");
     }

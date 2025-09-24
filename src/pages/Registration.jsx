@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '/src/components/Navbar'
 import Footer from '/src/components/Footer'
 import axios from 'axios'
+import { AuthContext } from '/src/context/AuthContext.jsx'
 
 function Registration() {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ function Registration() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // redirect to dashboard if user is already logged in
+  const { isLoggedIn, userRole } = useContext(AuthContext); // Load the login context function
+  if(isLoggedIn) {
+    navigate('/dashboard/'+userRole);
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
