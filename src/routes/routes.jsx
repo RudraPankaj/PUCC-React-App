@@ -2,22 +2,24 @@ import React from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
 import ProtectedRoute from '/src/routes/ProtectedRoute.jsx'
-
 import App from '/src/App.jsx'
-import HomePage from '/src/pages/Home.jsx'
-import LoginPage from '/src/pages/Login.jsx'
-import RegistrationPage from '/src/pages/Registration.jsx'
-import AboutPage from '/src/pages/About.jsx'
-import NotFound from '/src/pages/NotFound.jsx'
-import ExecutiveDashboard from '/src/pages/dashboard/ExecutiveDashboard'
-import MemberDashboard from '/src/pages/dashboard/MemberDashboard'
-import InstructorDashboard from '/src/pages/dashboard/InstructorDashboard'
-import UnAuthorized from '/src/pages/UnAuthorized'
+
+// lazy load pages to reduce initial bundle
+const HomePage = React.lazy(() => import('/src/pages/Home.jsx'))
+const LoginPage = React.lazy(() => import('/src/pages/Login.jsx'))
+const RegistrationPage = React.lazy(() => import('/src/pages/Registration.jsx'))
+const AboutPage = React.lazy(() => import('/src/pages/About.jsx'))
+const NotFound = React.lazy(() => import('/src/pages/NotFound.jsx'))
+const ExecutiveDashboard = React.lazy(() => import('/src/pages/dashboard/ExecutiveDashboard'))
+const MemberDashboard = React.lazy(() => import('/src/pages/dashboard/MemberDashboard'))
+const InstructorDashboard = React.lazy(() => import('/src/pages/dashboard/InstructorDashboard'))
+const UnAuthorized = React.lazy(() => import('/src/pages/UnAuthorized'))
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <NotFound />,
     children: [
       // Public routes
       { index: true, element: <HomePage /> },
@@ -26,7 +28,6 @@ const router = createBrowserRouter([
       { path: 'register', element: <RegistrationPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'unauthorized', element: <UnAuthorized /> },
-
 
       // Protected routes for specific user roles
       {
