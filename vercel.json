@@ -23,5 +23,5 @@
       "dest": "/"
     }
   ],
-  "installCommand": "npm install --prefix backend && npm install"
+  "installCommand": "npm install; npm install --prefix backend"
 }
