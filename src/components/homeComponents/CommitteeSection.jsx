@@ -16,7 +16,13 @@ const CommitteeSection = () => {
       <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
         {committee.map((member, i) => (
           <div key={i} className="text-center p-4 bg-gray-50 rounded-lg shadow hover:scale-105 transition">
-            <img src={member.photo} alt={member.name} className="w-32 h-32 mx-auto rounded-full mb-4 object-cover" />
+            <img 
+              src={member.photo} 
+              alt={member.name} 
+              loading="lazy"
+              widtth="128" height="128"
+              className="w-32 h-32 mx-auto rounded-full mb-4 object-cover" 
+            />
             <h4 className="font-semibold">{member.name}</h4>
             <p className="text-gray-600">{member.position}</p>
           </div>

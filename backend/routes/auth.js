@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 // Register
 router.post('/register', async (req, res) => {
-    const { username, studentId, email, contact, gender, password, role } = req.body;
+    const { username, profileimgurl, studentId, email, contact, gender, password, role } = req.body;
 
     try {
         const existingUser = await User.findOne({ studentId });
@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({ username, studentId, email, contact, gender, password: hashedPassword, role });
+        const newUser = new User({ username, profileimgurl, studentId, email, contact, gender, password: hashedPassword, role });
         await newUser.save();
 
         res.status(201).json({ msg: "User registered successfully. Redirecting to login page..." });
@@ -40,6 +40,7 @@ router.post('/login', async (req, res) => {
         const userPayload = {
             id: user._id,
             username: user.username,
+            profileimgurl: user.profileimgurl,
             studentId: user.studentId,
             email: user.email,
             contact: user.contact,

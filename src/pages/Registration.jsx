@@ -1,9 +1,11 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '/src/components/Navbar'
 import Footer from '/src/components/Footer'
 import axios from 'axios'
 import { AuthContext } from '/src/context/AuthContext.jsx'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Registration() {
   const navigate = useNavigate();
@@ -22,9 +24,11 @@ function Registration() {
 
   // redirect to dashboard if user is already logged in
   const { isLoggedIn, userRole } = useContext(AuthContext); // Load the login context function
-  if(isLoggedIn) {
-    navigate('/dashboard/'+userRole);
-  }
+  useEffect(() => {
+    if(isLoggedIn) {
+      navigate('/dashboard/'+userRole, { replace: true });
+    }
+  }, [isLoggedIn, userRole, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,7 +42,7 @@ function Registration() {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const res = await axios.post(`${API_BASE_URL}`, formData);
       setSuccess(res.data.msg);
       setError('');
       setTimeout(() => navigate('/login'), 2000);

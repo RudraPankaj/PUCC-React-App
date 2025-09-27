@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthLoading(true);
 
         if (token) {
-            axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+            axios.get(`${API_BASE_URL}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {

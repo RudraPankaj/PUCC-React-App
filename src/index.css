@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'Michroma';
-  src: url('/fonts/Michroma-Regular.ttf') format('truetype');
+  font-family: 'Montserrat';
+  src: url('fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -10,9 +10,32 @@
 body {
   padding: 0;
   margin: auto;
-  font-family: "Michroma", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 .footer-links a:hover {
   color: white;
+}
+
+.shadow-right {
+  box-shadow: 4px 0 6px -2px rgba(0,0,0,0.3);
+}
+
+@keyframes slide {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-slide {
+  animation: slide 8s linear infinite;
+  background: linear-gradient(
+    90deg,
+    #438eff 0%,
+    #0063af 30%,
+    #003964 60%,
+    #0063af 80%,
+    #438eff 100%
+  );
+  background-size: 300% 100%;
 }

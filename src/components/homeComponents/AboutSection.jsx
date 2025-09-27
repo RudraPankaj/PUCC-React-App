@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom'
 
 const AboutSection = () => {
     return (
@@ -19,9 +20,11 @@ const AboutSection = () => {
                     learners to excel in competitive programming, software engineering,
                     networking, and deep neural research.
                 </p>
-                <button className="px-8 py-3 bg-gradient-to-r from-[#0067b6] to-[#00b6d6] text-white font-semibold rounded-xl shadow-lg hover:scale-105 hover:from-[#005a9e] hover:to-[#009ec6] transition-all duration-200">
-                    Learn More
-                </button>
+                <Link to="/about">
+                    <button className="px-8 py-3 bg-gradient-to-r from-[#0067b6] to-[#00b6d6] text-white font-semibold rounded-xl shadow-lg hover:scale-105 hover:from-[#005a9e] hover:to-[#009ec6] transition-all duration-200">
+                        Learn More
+                    </button>
+                </Link>
             </div>
         </section>
     );
