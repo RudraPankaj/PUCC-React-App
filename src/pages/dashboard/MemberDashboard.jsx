@@ -1,7 +1,7 @@
 import React from 'react'
-import DashboardLayout from '/src/components/dashboard/DashboardLayout'
-import ProfileSection from '/src/components/dashboard/sections/ProfileSection'
-import EventsSection from '/src/components/dashboard/sections/EventsSection'
+import DashboardLayout from '../../components/dashboard/DashboardLayout'
+import ProfileSection from '../../components/dashboard/sections/ProfileSection'
+import EventsSection from '../../components/dashboard/sections/EventsSection'
 
 function MemberDashboard() {
   return (

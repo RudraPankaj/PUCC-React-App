@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { AuthContext } from '/src/context/AuthContext.jsx'
+import { AuthContext } from '../../../context/AuthContext'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

@@ -1,8 +1,8 @@
 import React from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
-import ProtectedRoute from '/src/routes/ProtectedRoute.jsx'
-import App from '/src/App.jsx'
+import ProtectedRoute from './ProtectedRoute'
+import App from '../App'
 
 // lazy load pages to reduce initial bundle
 const HomePage = React.lazy(() => import('/src/pages/Home.jsx'))

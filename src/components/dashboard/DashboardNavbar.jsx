@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AuthContext } from '/src/context/AuthContext.jsx'
+import { AuthContext } from '../../context/AuthContext'
 
 export default function DashboardNavbar({ setMobileOpen }) {
   const { userData, logout } = useContext(AuthContext);
