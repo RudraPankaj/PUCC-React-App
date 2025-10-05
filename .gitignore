@@ -2,6 +2,9 @@
 node_modules/
 backend/node_modules/
 
+# Backend folder
+backend/
+
 # Build / dev output
 dist/
 build/
