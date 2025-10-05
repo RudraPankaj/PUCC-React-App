@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 function Footer() {
   return (
@@ -10,7 +11,7 @@ function Footer() {
           {/* Links Section */}
           <div className="grid grid-cols-2 gap-10 md:gap-20 text-[#9e9e9e]">
             <div className="flex flex-col gap-2 footer-links">
-              <span><a href="#about-us">About Us</a></span>
+              <span><Link to="/about">About Us</Link></span>
               <span><a href="#contact">Contact</a></span>
               <span><a href="#policy">Privacy Policy</a></span>
               <span><a href="#tos">Terms of Service</a></span>
