@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import axios from 'axios'
-import { AuthContext } from '../context/AuthContext'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Registration() {
   const navigate = useNavigate();
@@ -21,14 +18,6 @@ function Registration() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // redirect to dashboard if user is already logged in
-  const { isLoggedIn, userRole } = useContext(AuthContext); // Load the login context function
-  useEffect(() => {
-    if(isLoggedIn) {
-      navigate('/dashboard/'+userRole, { replace: true });
-    }
-  }, [isLoggedIn, userRole, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
