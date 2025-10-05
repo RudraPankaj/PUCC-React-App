@@ -35,12 +35,12 @@ function HeroSection() {
                     Celebrating unity, learning, and innovation. Together, we grow stronger as a community of passionate minds.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a
-                        href="#about"
+                    <Link
+                        to="/about"
                         className="bg-white/90 text-[#111] font-semibold px-8 py-3 rounded-full shadow hover:bg-white transition"
                     >
                         Learn More
-                    </a>
+                    </Link>
                     <Link
                         to="/register"
                         className="bg-[#111]/80 text-white font-semibold px-8 py-3 rounded-full border border-white/40 hover:bg-[#222] transition"

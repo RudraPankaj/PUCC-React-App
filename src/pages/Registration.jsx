@@ -1,8 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import Navbar from '/src/components/Navbar'
+import Footer from '/src/components/Footer'
 import axios from 'axios'
+import { AuthContext } from '/src/context/AuthContext.jsx'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Registration() {
   const navigate = useNavigate();
@@ -19,6 +22,14 @@ function Registration() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // redirect to dashboard if user is already logged in
+  const { isLoggedIn, userRole } = useContext(AuthContext); // Load the login context function
+  useEffect(() => {
+    if(isLoggedIn) {
+      navigate('/dashboard/'+userRole, { replace: true });
+    }
+  }, [isLoggedIn, userRole, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -31,12 +42,12 @@ function Registration() {
       return;
     }
     try {
-      const res = await axios.post(`${API_BASE_URL}`, formData);
+      const res = await axios.post(`${API_BASE_URL}/auth/register`, formData);
       setSuccess(res.data.msg);
       setError('');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.msg || "Database connection failed!");
+      setError(err.response?.data?.msg || err.message || "Database connection failed!");
       setSuccess('');
     }
   }
