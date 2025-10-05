@@ -10,16 +10,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 function Login() {
   
   const navigate = useNavigate();
-  const { isLoggedIn, login, userRole } = useContext(AuthContext); // Load the login context function
+  const { login } = useContext(AuthContext); // Load the login context function
   const [formData, setFormData] = useState({ email: '', password: '', role: 'member' });
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if(isLoggedIn) {
-      navigate('/dashboard/'+userRole, { replace: true });
-    }
-  }, [isLoggedIn, userRole, navigate]);
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,14 +27,14 @@ function Login() {
       // store token and also let AuthContext know about the logged in user
       localStorage.setItem('token', res.data.token);
 
-      // backend returns { token, isLoggedIn, user }
+      //backend returns { token, user: { email, role } }
       const authPayload = {
         user: res.data.user,
         role: res.data.user?.role,
         token: res.data.token,
       };
       login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
-      navigate('/dashboard/'+ authPayload.role); // redirect to user dashboard
+      navigate('/home');
     } catch (err) {
       setError(err.response?.data?.msg || "Database connection failed");
     }
