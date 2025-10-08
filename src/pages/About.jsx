@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -148,12 +149,12 @@ const About = () => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             Become part of a vibrant tech community, learn, build, and compete with the best.
           </p>
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="bg-[#00aae4] hover:bg-[#0067b6] text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-colors duration-300"
           >
             Register as a Member
-          </a>
+          </Link>
         </section>
 
       </div>
