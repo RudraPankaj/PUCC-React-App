@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '/src/components/Navbar'
-import Footer from '/src/components/Footer'
+import Navbar from '../components/Navbar.jsx'
+import Footer from '../components/Footer.jsx'
 
 // Mock data for the 9 committee images.
 const committeeImages = [
