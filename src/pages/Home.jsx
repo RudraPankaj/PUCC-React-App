@@ -1,12 +1,12 @@
 import React from 'react'
-import Navbar from '/src/components/Navbar'
-import Footer from '/src/components/Footer'
-import HeroSection from '/src/components/homeComponents/HeroSection'
-import AboutSection from '/src/components/homeComponents/AboutSection'
-import WingsSection from '/src/components/homeComponents/WingsSection'
-import ConstitutionSection from '/src/components/homeComponents/ConstitutionSection'
-import CommitteeSection from '/src/components/homeComponents/CommitteeSection'
-import CTASection from '/src/components/homeComponents/CTASection'
+import Navbar from '../components/Navbar.jsx'
+import Footer from '../components/Footer.jsx'
+import HeroSection from '../components/homeComponents/HeroSection.jsx'
+import AboutSection from '../components/homeComponents/AboutSection.jsx'
+import WingsSection from '../components/homeComponents/WingsSection.jsx'
+import ConstitutionSection from '../components/homeComponents/ConstitutionSection.jsx'
+import CommitteeSection from '../components/homeComponents/CommitteeSection.jsx'
+import CTASection from '../components/homeComponents/CTASection.jsx'
 
 function Home() {
   return (
