@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar.jsx'
-import Footer from '../components/Footer.jsx'
 import axios from 'axios'
 import { AuthContext } from '../context/AuthContext.jsx'
+
+import Navbar from '../components/Navbar.jsx'
+import Footer from '../components/Footer.jsx'
+import AlertModal from '../components/AlertModal.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -19,8 +21,16 @@ function Registration() {
     confirmPassword: '',
     role: 'member'
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  
+  const [modalState, setModalState] = useState({
+    show: false,
+    type: '', // 'success' or 'error'
+    message: ''
+  });
+
+  const handleCloseModal = () => {
+      setModalState({ show: false, type: '', message: '' });
+  };
 
   // redirect to dashboard if user is already logged in
   const { isLoggedIn, userRole } = useContext(AuthContext); // Load the login context function
@@ -38,17 +48,15 @@ function Registration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setModalState({show: true, type: 'error', message: "Passwords do not match",});
       return;
     }
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/register`, formData);
-      setSuccess(res.data.msg);
-      setError('');
+      setModalState({show: true, type: 'error', message: res.data.msg,});
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.msg || err.message || "Database connection failed!");
-      setSuccess('');
+      setModalState({show: true, type: 'error', message: err.response?.data?.msg || err.message || "Database connection failed!",});
     }
   }
 
@@ -59,9 +67,6 @@ function Registration() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#f0f8ff] to-[#cce6ff] py-12 px-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 mt-20 mb-20">
           <h2 className="text-3xl font-bold text-center text-[#0067b6] mb-6">Join PUCC</h2>
-
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          {success && <p className="text-green-500 text-center mb-4">{success}</p>}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
 
@@ -190,6 +195,13 @@ function Registration() {
             Already have an account? <Link to="/login" className="text-[#0076b6] font-semibold">Login here</Link>
           </p>
         </div>
+
+        <AlertModal
+            show={modalState.show}
+            type={modalState.type}
+            message={modalState.message}
+            onClose={handleCloseModal}
+        />
       </div>
 
       <Footer />
