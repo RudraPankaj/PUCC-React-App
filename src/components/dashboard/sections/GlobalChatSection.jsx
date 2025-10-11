@@ -16,6 +16,7 @@ export default function GlobalChatSection() {
 
   const myId = userData?._id ?? userData?.id ?? userData?.email
 
+  // load + poll
   useEffect(() => {
     let mounted = true
     const load = async () => {
@@ -32,6 +33,7 @@ export default function GlobalChatSection() {
     return () => { mounted = false; clearInterval(t) }
   }, [])
 
+  // scroll to bottom when new message
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
@@ -54,6 +56,7 @@ export default function GlobalChatSection() {
       }
     }
 
+    // optimistic add
     setMessages(prev => [...prev, newMsg])
     setText('')
     setSending(true)
@@ -79,8 +82,14 @@ export default function GlobalChatSection() {
     return uid && myId && uid.toString() === myId.toString()
   }
 
+  // Sort messages chronologically
+  const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+
   return (
-    <div className="flex flex-col h-screen bg-white rounded-lg shadow-lg overflow-hidden relative">
+    <div
+      className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden relative"
+      style={{ height: 'calc(100vh - 64px)' }} // adjust 64px to your navbar height
+    >
       {/* Header */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
@@ -101,12 +110,12 @@ export default function GlobalChatSection() {
       {/* Messages */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto flex flex-col justify-end space-y-4 bg-[linear-gradient(180deg,#f8fbff,white)]"
+        className="flex-1 overflow-auto flex flex-col justify-end bg-[linear-gradient(180deg,#f8fbff,white)]"
         style={{ minHeight: 0 }}
         aria-live="polite"
       >
         <div className="flex flex-col gap-4 px-4 py-4">
-          {messages.map((m) => {
+          {sortedMessages.map((m) => {
             const mine = isMine(m)
             const name = m?.user?.username || 'Unknown'
             const avatar = m?.user?.profileimgurl || '/icons/pucc.png'
@@ -115,18 +124,23 @@ export default function GlobalChatSection() {
                 {!mine && (
                   <img src={avatar} alt={name} className="w-9 h-9 rounded-full object-cover shadow-sm" />
                 )}
-
                 <div className={`max-w-[80%] ${mine ? 'text-right' : 'text-left'}`}>
                   <div className="text-xs text-gray-500 mb-1 flex items-center justify-between gap-2">
                     <span className="font-medium text-gray-700">{name}</span>
-                    <time className="text-[11px] text-gray-400">{new Date(m.createdAt || Date.now()).toLocaleTimeString()}</time>
+                    <time className="text-[11px] text-gray-400">
+                      {new Date(m.createdAt || Date.now()).toLocaleTimeString()}
+                    </time>
                   </div>
-
-                  <div className={`inline-block px-4 py-2 rounded-xl break-words ${mine ? 'bg-[#0067b6] text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`}>
+                  <div
+                    className={`inline-block px-4 py-2 rounded-xl break-words ${
+                      mine
+                        ? 'bg-[#0067b6] text-white rounded-br-none'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                    }`}
+                  >
                     {m.text}
                   </div>
                 </div>
-
                 {mine && (
                   <img src={avatar} alt={name} className="w-9 h-9 rounded-full object-cover shadow-sm" />
                 )}
