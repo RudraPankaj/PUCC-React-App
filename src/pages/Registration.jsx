@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { register as apiRegister } from '../utils/api.js'
+import { parseApiError } from '../utils/helpers.js'
 import { AuthContext } from '../context/AuthContext.jsx'
 
 import Navbar from '../components/Navbar.jsx'
@@ -52,11 +53,11 @@ function Registration() {
       return;
     }
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/register`, formData);
-      setModalState({show: true, type: 'error', message: res.data.msg,});
+      const data = await apiRegister(formData);
+      setModalState({show: true, type: 'success', message: data.msg || 'Registered successfully',});
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setModalState({show: true, type: 'error', message: err.response?.data?.msg || err.message || "Database connection failed!",});
+      setModalState({show: true, type: 'error', message: parseApiError(err),});
     }
   }
 

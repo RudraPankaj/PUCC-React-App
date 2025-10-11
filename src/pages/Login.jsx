@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { AuthContext } from '../context/AuthContext.jsx'
+import { login as apiLogin } from '../utils/api.js'
+import { parseApiError, setToken } from '../utils/helpers.js'
 
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import AlertModal from '../components/AlertModal.jsx'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Login() {
   
@@ -40,21 +39,18 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/login`, formData);
-
-      // store token and also let AuthContext know about the logged in user
-      localStorage.setItem('token', res.data.token);
-
-      // backend returns { token, isLoggedIn, user }
+      const data = await apiLogin(formData);
+      // persist token
+      setToken(data.token);
       const authPayload = {
-        user: res.data.user,
-        role: res.data.user?.role,
-        token: res.data.token,
+        user: data.user,
+        role: data.user?.role,
+        token: data.token,
       };
       login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
       navigate('/dashboard/'+ authPayload.role);
     } catch (err) {
-      const message = err.response?.data?.msg || err.message || "Database connection failed";
+      const message = parseApiError(err);
       setModalState({show: true, type: 'error', message: message,});
     }
   }
