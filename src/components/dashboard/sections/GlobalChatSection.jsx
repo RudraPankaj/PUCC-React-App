@@ -87,8 +87,8 @@ export default function GlobalChatSection() {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden relative"
-      style={{ height: 'calc(100vh - 100px)' }}
+      className="flex flex-col bg-white rounded-lg shadow-lg overflow-scroll relative"
+      style={{ height: 'calc(100vh - 115px)' }}
     >
       {/* Header */}
       <div className="relative">
