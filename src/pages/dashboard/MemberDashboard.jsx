@@ -2,6 +2,7 @@ import React from 'react'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import ProfileSection from '../../components/dashboard/sections/ProfileSection'
 import EventsSection from '../../components/dashboard/sections/EventsSection'
+import GlobalChatSection from '../../components/dashboard/sections/GlobalChatSection'
 
 function MemberDashboard() {
   return (
@@ -9,6 +10,7 @@ function MemberDashboard() {
       {({ active }) => (
         <>
           {active === 'profile' && <ProfileSection />}
+          {active === 'global-chat' && <GlobalChatSection />}
           {active === 'events' && <EventsSection />}
           {active === 'announcements' && <div><h2>Announcements</h2></div>}
           {active === 'resources' && <div><h2>Resources</h2></div>}
