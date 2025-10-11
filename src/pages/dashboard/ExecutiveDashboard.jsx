@@ -3,7 +3,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout.jsx'
 import ProfileSection from '../../components/dashboard/sections/ProfileSection'
 import EventsSection from '../../components/dashboard/sections/EventsSection'
 import ManageUsersSection from '../../components/dashboard/sections/ManageUsersSection'
-import GlobalChatSection from '../../components/dashboard/sections/GlobalChatSections'
+import GlobalChatSection from '../../components/dashboard/sections/GlobalChatSection'
 
 function ExecutiveDashboard() {
   return (
