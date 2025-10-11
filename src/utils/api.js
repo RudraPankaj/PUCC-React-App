@@ -40,15 +40,15 @@ export async function createEvent(payload) {
 
 // Global chat REST helpers (new)
 export async function getGlobalMessages() {
-  // GET /global-chat  -> returns { messages: [...] } or similar
-  const res = await api.get('/global-chat');
+  // GET /messages/global-chat  -> returns { messages: [...] } or similar
+  const res = await api.get('/messages/global-chat');
   // adapt if your backend uses a different shape
   return res.data.messages ?? res.data;
 }
 
 export async function postGlobalMessage(message) {
-  // POST /global-chat
-  const res = await api.post('/global-chat', message);
+  // POST /messages/global-chat
+  const res = await api.post('/messages/global-chat', message);
   return res.data;
 }
 

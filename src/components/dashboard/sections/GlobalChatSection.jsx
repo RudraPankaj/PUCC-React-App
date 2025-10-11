@@ -1,198 +1,179 @@
-import { useState, useEffect, useContext, useRef } from 'react';
-import { AuthContext } from '../../../context/AuthContext.jsx';
-import { getGlobalMessages, postGlobalMessage } from '../../../utils/api.js';
-import { formatDistanceToNow } from 'date-fns';
-import { toast } from 'react-toastify';
-import { v4 as uuidv4 } from 'uuid';
-import 'react-toastify/dist/ReactToastify.css';
-toast.configure();
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import { getGlobalMessages, postGlobalMessage } from '../../../utils/api.js'
+import { AuthContext } from '../../../context/AuthContext.jsx'
+import { v4 as uuidv4 } from 'uuid'
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
-const WS_PROTOCOL = import.meta.env.VITE_WS_PROTOCOL || 'ws';
-const MAX_MESSAGES = 50;
-const RECONNECT_INTERVAL = 5000;
+export default function GlobalChatSection() {
+  const { userData } = useContext(AuthContext)
+  const [messages, setMessages] = useState([])
+  const [text, setText] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState(null)
+  const containerRef = useRef(null)
+  const endRef = useRef(null)
+  const POLL_INTERVAL = 5000
+  const CHAR_LIMIT = 1000
 
-function GlobalChatSection() {
-    const { userData } = useContext(AuthContext);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
-    const ws = useRef(null);
-    const messagesEndRef = useRef(null);
-    const [isWsConnected, setIsWsConnected] = useState(false);
-    const reconnectTimeout = useRef(null);
+  const myId = userData?._id ?? userData?.id ?? userData?.email
 
-    // Fetch initial messages
-    useEffect(() => {
-        getGlobalMessages()
-            .then((msgs) => setMessages((Array.isArray(msgs) ? msgs : msgs || []).slice(-MAX_MESSAGES)))
-            .catch(() => toast.error('Failed to load messages', { position: toast.POSITION.BOTTOM_RIGHT, autoClose: 2000 }));
-    }, []);
+  // initial load + polling
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const msgs = await getGlobalMessages()
+        if (!mounted) return
+        // ensure array
+        setMessages(Array.isArray(msgs) ? msgs : (msgs.messages ?? []))
+      } catch () {
+        // ignore silently (or setError)
+        setError('Unable to load messages')
+      }
+    }
+    load()
+    const t = setInterval(load, POLL_INTERVAL)
+    return () => { mounted = false; clearInterval(t) }
+  }, [])
 
-    // Scroll to bottom when messages change
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+  // scroll to bottom on new messages
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [messages])
 
-    // Build WS URL at connect time and append token if available
-    const buildWsUrl = () => {
-        const host = (WS_BASE_URL || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
-        const base = `${WS_PROTOCOL}://${host}/ws/global-chat`;
-        const token = localStorage.getItem('token');
-        return token ? `${base}?token=${encodeURIComponent(token)}` : base;
-    };
+  const sendMessage = async (e) => {
+    e?.preventDefault()
+    if (!text.trim()) return
+    if (text.length > CHAR_LIMIT) return
 
-    // WebSocket connection
-    const connectWebSocket = () => {
-        if (ws.current) {
-            try { ws.current.close(); } catch {
-                // ignore
-            }
-            ws.current = null;
-        }
+    const tempId = uuidv4()
+    const now = new Date().toISOString()
+    const newMsg = {
+      id: tempId,
+      _id: tempId,
+      text: text.trim(),
+      createdAt: now,
+      user: {
+        _id: myId,
+        username: userData?.username ?? 'You',
+        profileimgurl: userData?.profileimgurl ?? null
+      }
+    }
 
-        const url = buildWsUrl();
-        try {
-            ws.current = new WebSocket(url);
-        } catch {
-            // fallback: schedule reconnect
-            setIsWsConnected(false);
-            reconnectTimeout.current = setTimeout(connectWebSocket, RECONNECT_INTERVAL);
-            return;
-        }
+    // optimistic UI
+    setMessages(prev => [...prev, newMsg])
+    setText('')
+    setSending(true)
+    setError(null)
 
-        ws.current.onopen = () => {
-            setIsWsConnected(true);
-            toast.success('Connected to global chat', { position: toast.POSITION.BOTTOM_RIGHT, autoClose: 2000 });
-            if (reconnectTimeout.current) {
-                clearTimeout(reconnectTimeout.current);
-                reconnectTimeout.current = null;
-            }
-        };
-        ws.current.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'message' && data.message) {
-                    setMessages((prev) => {
-                        const updated = [...prev, data.message];
-                        return updated.slice(-MAX_MESSAGES);
-                    });
-                }
-            } catch {
-                // ignore malformed messages
-            }
-        };
-        ws.current.onclose = () => {
-            setIsWsConnected(false);
-            toast.error('Disconnected from global chat', { position: toast.POSITION.BOTTOM_RIGHT, autoClose: 2000 });
-            reconnectTimeout.current = setTimeout(connectWebSocket, RECONNECT_INTERVAL);
-        };
-        ws.current.onerror = () => {
-            // network or protocol error - close to trigger reconnect logic
-            try { ws.current.close(); } catch {
-                // ignore
-            }
-        };
-    };
+    try {
+      const res = await postGlobalMessage({ text: newMsg.text })
+      // replace optimistic message if backend returned the real object (match by temp id)
+      if (res?.message) {
+        setMessages(prev => prev.map(m => (m._id === tempId ? res.message : m)))
+      } else if (res?.id || res?._id) {
+        // if backend returns id only, update id
+        setMessages(prev => prev.map(m => (m._id === tempId ? { ...m, _id: res._id ?? res.id } : m)))
+      }
+    } catch () {
+      // revert optimistic add
+      setMessages(prev => prev.filter(m => m._id !== tempId))
+      setError('Failed to send message')
+    } finally {
+      setSending(false)
+    }
+  }
 
-    useEffect(() => {
-        connectWebSocket();
-        return () => {
-            if (ws.current) ws.current.close();
-            if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
-        };
-    }, []);
+  const isMine = (msg) => {
+    const uid = msg?.user?._id ?? msg?.user?.id ?? msg?.user?.email
+    return uid && myId && uid.toString() === myId.toString()
+  }
 
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-        if (!newMessage.trim()) return;
-        const message = {
-            id: uuidv4(),
-            text: newMessage,
-            user: userData,
-            timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, message].slice(-MAX_MESSAGES));
-        setNewMessage('');
-        try {
-            await postGlobalMessage(message);
-        } catch {
-            toast.error('Error sending message', { position: toast.POSITION.BOTTOM_RIGHT, autoClose: 2000 });
-        }
-    };
-
-    return (
-        <div className="flex flex-col h-full w-full bg-gradient-to-b from-indigo-500 via-purple-500 to-transparent rounded-xl shadow-lg overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-b from-indigo-700 to-indigo-500 text-white">
-                <i className="bi bi-chat-dots text-2xl mr-2" />
-                <span className="font-semibold text-lg">Global Chat</span>
-                <span className="ml-auto flex items-center gap-2">
-                    {isWsConnected ? (
-                        <span className="flex items-center gap-1 text-green-300">
-                            <i className="bi bi-circle-fill text-xs" /> Online
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-1 text-yellow-300 animate-pulse">
-                            <i className="bi bi-circle-half text-xs" /> Reconnecting...
-                        </span>
-                    )}
-                </span>
+  return (
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden">
+      {/* Transparent top shading / header */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
+        <div className="px-4 py-3 backdrop-blur-sm bg-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+              <img src={userData?.profileimgurl || '/icons/pucc.png'} alt="me" className="w-full h-full object-cover" />
             </div>
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 bg-transparent">
-                {messages.map((msg) => {
-                    const isOwn = msg.user?.id === userData?.id;
-                    return (
-                        <div
-                            key={msg.id}
-                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div className={`max-w-xs w-fit px-4 py-2 rounded-lg shadow
-                                ${isOwn
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-white text-gray-800 border border-gray-200'
-                                } flex flex-col`}
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <i className={`bi bi-person-circle ${isOwn ? 'text-white' : 'text-indigo-500'} text-lg`} />
-                                    <span className={`font-semibold text-sm ${isOwn ? 'text-white' : 'text-indigo-700'}`}>
-                                        {msg.user?.name || 'Unknown'}
-                                    </span>
-                                </div>
-                                <span className="text-base break-words">{msg.text}</span>
-                                <span className="text-xs text-gray-400 mt-1 self-end">
-                                    {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
-                                </span>
-                            </div>
-                        </div>
-                    );
-                })}
-                <div ref={messagesEndRef} />
+            <div>
+              <div className="text-sm font-semibold text-gray-800">Global Chat</div>
+              <div className="text-xs text-gray-500">A place for everyone — be respectful</div>
             </div>
-            {/* Input */}
-            <form
-                onSubmit={handleSendMessage}
-                className="flex items-center px-4 py-3 bg-white border-t border-gray-200"
-            >
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300 text-gray-800"
-                    disabled={!isWsConnected}
-                />
-                <button
-                    type="submit"
-                    className="ml-2 px-4 py-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center gap-1 disabled:opacity-50"
-                    disabled={!isWsConnected || !newMessage.trim()}
-                >
-                    <i className="bi bi-send" />
-                    Send
-                </button>
-            </form>
+          </div>
+          <div className="text-xs text-gray-500">{messages.length} messages</div>
         </div>
-    );
-}
+      </div>
 
-export default GlobalChatSection;
+      {/* Messages container */}
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-auto px-4 py-4 space-y-4 bg-[linear-gradient(180deg,#f8fbff,white)]"
+        style={{ minHeight: 0 }}
+        aria-live="polite"
+      >
+        {messages.map((m) => {
+          const mine = isMine(m)
+          const name = m?.user?.username || 'Unknown'
+          const avatar = m?.user?.profileimgurl || '/icons/pucc.png'
+          return (
+            <div key={m._id || m.id || Math.random()} className={`flex items-start gap-3 ${mine ? 'justify-end' : 'justify-start'}`}>
+              {/* left avatar for others, right for mine (mirror) */}
+              {!mine && (
+                <img src={avatar} alt={name} className="w-9 h-9 rounded-full object-cover shadow-sm" />
+              )}
+
+              <div className={`max-w-[80%] ${mine ? 'text-right' : 'text-left'}`}>
+                <div className="text-xs text-gray-500 mb-1 flex items-center justify-between gap-2">
+                  <span className="font-medium text-gray-700">{name}</span>
+                  <time className="text-[11px] text-gray-400">{new Date(m.createdAt || m.createdAt || Date.now()).toLocaleTimeString()}</time>
+                </div>
+
+                <div className={`inline-block px-4 py-2 rounded-xl break-words ${mine ? 'bg-[#0067b6] text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`}>
+                  {m.text}
+                </div>
+              </div>
+
+              {mine && (
+                <img src={avatar} alt={name} className="w-9 h-9 rounded-full object-cover shadow-sm" />
+              )}
+            </div>
+          )
+        })}
+
+        <div ref={endRef} />
+      </div>
+
+      {/* Fixed input area */}
+      <form onSubmit={sendMessage} className="px-4 py-3 border-t bg-white flex items-end gap-3">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value.slice(0, CHAR_LIMIT))}
+          placeholder="Write a message..."
+          maxLength={CHAR_LIMIT}
+          className="flex-1 resize-none h-16 md:h-20 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#00aae4]"
+          aria-label="Message"
+        />
+        <div className="flex flex-col items-end gap-2">
+          <button
+            type="submit"
+            disabled={!text.trim() || sending}
+            className="px-4 py-2 bg-[#0067b6] text-white rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {sending ? 'Sending...' : 'Send'}
+          </button>
+          <div className="text-xs text-gray-400">{text.length}/{CHAR_LIMIT}</div>
+        </div>
+      </form>
+
+      {/* inline error */}
+      {error && (
+        <div className="absolute bottom-24 right-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded shadow">
+          {error}
+        </div>
+      )}
+    </div>
+  )
+}
