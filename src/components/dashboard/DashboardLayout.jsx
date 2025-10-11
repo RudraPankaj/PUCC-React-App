@@ -6,7 +6,6 @@ export default function DashboardLayout({ role = 'member', children }) {
   const [active, setActive] = useState('profile')
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  // fixed sidebar width on md+; no shrink option on desktop
   const mainPaddingClasses = 'md:pl-64'
 
   return (
