@@ -25,7 +25,7 @@ export default function GlobalChatSection() {
         if (!mounted) return
         // ensure array
         setMessages(Array.isArray(msgs) ? msgs : (msgs.messages ?? []))
-      } catch () {
+      } catch {
         // ignore silently (or setError)
         setError('Unable to load messages')
       }
@@ -74,7 +74,7 @@ export default function GlobalChatSection() {
         // if backend returns id only, update id
         setMessages(prev => prev.map(m => (m._id === tempId ? { ...m, _id: res._id ?? res.id } : m)))
       }
-    } catch () {
+    } catch {
       // revert optimistic add
       setMessages(prev => prev.filter(m => m._id !== tempId))
       setError('Failed to send message')
