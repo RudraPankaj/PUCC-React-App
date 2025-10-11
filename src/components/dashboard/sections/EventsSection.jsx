@@ -4,7 +4,7 @@ import { getEvents, createEvent } from '../../../utils/api.js'
 import { AuthContext } from '../../../context/AuthContext.jsx'
 
 function EventCard({ e }) {
-  const fmt = (d) => d ? new Date(d).toLocaleDateString() : '-';
+  const format_date = (d) => d ? new Date(d).toLocaleDateString() : '-';
 
   // limit summary length
   const truncate = (text, length = 80) => {
@@ -33,14 +33,14 @@ function EventCard({ e }) {
 
       {/* Meta Info */}
       <p className="flex items-center gap-1 text-xs text-[#0067b6] font-semibold">
-        <i className="bi bi-calendar-event mr-1"></i> {fmt(e.date)}
+        <i className="bi bi-calendar-event mr-1"></i> {format_date(e.date)}
       </p>
       <p className="flex items-center gap-1 text-xs text-gray-500 font-semibold">
         <i className="bi bi-person mr-1"></i> {e.publishedBy}
       </p>
       {e.lastRegistrationDate && (
         <p className="flex items-center gap-1 text-xs text-gray-500 font-semibold">
-          <i className="bi bi-clock mr-1"></i> Last reg: {fmt(e.lastRegistrationDate)}
+          <i className="bi bi-clock mr-1"></i> Last reg: {format_date(e.lastRegistrationDate)}
         </p>
       )}
 
