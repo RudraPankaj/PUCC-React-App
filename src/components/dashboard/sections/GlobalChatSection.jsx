@@ -87,7 +87,7 @@ export default function GlobalChatSection() {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-lg shadow-lg overflow-scroll relative"
+      className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden relative"
       style={{ height: 'calc(100vh - 115px)' }}
     >
       {/* Header */}
@@ -110,7 +110,7 @@ export default function GlobalChatSection() {
       {/* Messages */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto flex flex-col justify-end bg-[linear-gradient(180deg,#f8fbff,white)]"
+        className="flex-1 overflow-scroll flex flex-col justify-end bg-[linear-gradient(180deg,#f8fbff,white)]"
         style={{ minHeight: 0 }}
         aria-live="polite"
       >
