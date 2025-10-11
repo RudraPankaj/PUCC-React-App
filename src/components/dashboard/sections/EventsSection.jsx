@@ -1,9 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { getEvents, createEvent } from '../../../utils/api.js'
 import { AuthContext } from '../../../context/AuthContext.jsx'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function EventCard({ e }) {
   const fmt = (d) => d ? new Date(d).toLocaleDateString() : '-';
@@ -77,8 +75,8 @@ export default function EventsSection() {
 
   useEffect(() => {
     // load events from backend
-    axios.get(`${API_BASE_URL}/events`)
-      .then(res => setEvents(res.data.events || []))
+    getEvents()
+      .then(res => setEvents(res.events || []))
       .catch(() => {});
   }, []);
 
@@ -93,12 +91,9 @@ export default function EventsSection() {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${API_BASE_URL}/events`, form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.data?.event) {
-        setEvents(prev => [res.data.event, ...prev]);
+      const res = await createEvent(form);
+      if (res?.event) {
+        setEvents(prev => [res.event, ...prev]);
         setForm({ title: '', date: '', publishedBy: userData?.username || '', summary: '', image: '', lastRegistrationDate: '', wing: 'All' });
       }
     } catch (err) {
