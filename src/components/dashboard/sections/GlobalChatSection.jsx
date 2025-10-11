@@ -88,7 +88,7 @@ export default function GlobalChatSection() {
   return (
     <div
       className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden relative"
-      style={{ height: 'calc(100vh - 64px)' }} // adjust 64px to your navbar height
+      style={{ height: 'calc(100vh - 100px)' }}
     >
       {/* Header */}
       <div className="relative">
