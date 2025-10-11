@@ -42,13 +42,16 @@ function Login() {
       const data = await apiLogin(formData);
       // persist token
       setToken(data.token);
+      // normalize role to lowercase to match router paths (dashboard/member etc.)
+      const normalizedRole = (data.user?.role || '').toString().toLowerCase() || 'member';
       const authPayload = {
         user: data.user,
-        role: data.user?.role,
+        role: normalizedRole,
         token: data.token,
       };
+
       login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
-      navigate('/dashboard/'+ authPayload.role);
+      navigate(`/dashboard/${authPayload.role}`, { replace: true });
     } catch (err) {
       const message = parseApiError(err);
       setModalState({show: true, type: 'error', message: message,});

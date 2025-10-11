@@ -13,7 +13,8 @@ export const AuthProvider = ({ children }) => {
     // Login function
     const login = (data) => {
         setIsLoggedIn(true);
-        setUserRole(data.role);
+        // ensure stored role is normalized
+        setUserRole(data.role?.toString().toLowerCase() ?? null);
         setUserData(data.user);
         localStorage.setItem('userAuthData', JSON.stringify(data));
         if (data.token) localStorage.setItem('token', data.token);
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             getMe()
                 .then(res => {
-                    const data = { user: res.user, role: res.user.role, token };
+                    const data = { user: res.user, role: res.user.role?.toString().toLowerCase(), token };
                     login(data);
                 })
                 .catch(() => {
