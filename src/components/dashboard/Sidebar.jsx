@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 export default function Sidebar({ role = 'member', active, setActive, mobileOpen, setMobileOpen }) {
   const base = [
     { id: 'profile', label: 'My Profile', icon: 'bi-person' },
+    { id: 'global-chat', label: 'Global Chat', icon: 'bi-envelope' },
     { id: 'events', label: 'Events Timeline', icon: 'bi-calendar-event' },
     { id: 'announcements', label: 'Announcements', icon: 'bi-megaphone' },
     { id: 'resources', label: 'Resources', icon: 'bi-folder2-open' },
