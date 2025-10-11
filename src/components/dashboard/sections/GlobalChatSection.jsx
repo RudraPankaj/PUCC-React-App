@@ -89,7 +89,7 @@ export default function GlobalChatSection() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden relative">
       {/* Transparent top shading / header */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
@@ -170,7 +170,7 @@ export default function GlobalChatSection() {
 
       {/* inline error */}
       {error && (
-        <div className="absolute bottom-24 right-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded shadow">
+        <div className="absolute left-1/2 bottom-24 -translate-x-1/2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded shadow">
           {error}
         </div>
       )}
