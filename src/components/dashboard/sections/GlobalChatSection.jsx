@@ -10,7 +10,6 @@ export default function GlobalChatSection() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState(null)
   const containerRef = useRef(null)
-  const endRef = useRef(null)
   const POLL_INTERVAL = 5000
   const CHAR_LIMIT = 1000
 
@@ -26,17 +25,13 @@ export default function GlobalChatSection() {
         setMessages(Array.isArray(msgs) ? msgs : (msgs.messages ?? []))
       } catch {
         setError('Unable to load messages')
+        setTimeout(() => setError(null), 3000)
       }
     }
     load()
     const t = setInterval(load, POLL_INTERVAL)
     return () => { mounted = false; clearInterval(t) }
   }, [])
-
-  // scroll to bottom when new message
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [messages])
 
   const sendMessage = async (e) => {
     e?.preventDefault()
@@ -72,6 +67,7 @@ export default function GlobalChatSection() {
     } catch {
       setMessages(prev => prev.filter(m => m._id !== tempId))
       setError('Failed to send message')
+      setTimeout(() => setError(null), 3000)
     } finally {
       setSending(false)
     }
@@ -88,7 +84,7 @@ export default function GlobalChatSection() {
   return (
     <div
       className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden relative"
-      style={{ height: 'calc(100vh - 125px)' }}
+      style={{ height: 'calc(100vh - 130px)' }}
     >
       {/* Header */}
       <div className="relative">
@@ -147,7 +143,6 @@ export default function GlobalChatSection() {
               </div>
             )
           })}
-          <div ref={endRef} />
         </div>
       </div>
 
