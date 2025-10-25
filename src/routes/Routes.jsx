@@ -14,6 +14,7 @@ const ExecutiveDashboard = React.lazy(() => import('../pages/dashboard/Executive
 const MemberDashboard = React.lazy(() => import('../pages/dashboard/MemberDashboard'))
 const InstructorDashboard = React.lazy(() => import('../pages/dashboard/InstructorDashboard'))
 const UnAuthorized = React.lazy(() => import('../pages/UnAuthorized'))
+const EventViewerPage = React.lazy(() => import('../pages/EventViewer.jsx'))
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: 'register', element: <RegistrationPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'unauthorized', element: <UnAuthorized /> },
+      { path: 'eventdetails/:id', element: <EventViewerPage /> },
 
       // Protected routes for specific user roles
       {

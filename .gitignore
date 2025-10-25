@@ -13,8 +13,7 @@ build/
 
 # Environment (do not commit secrets)
 .env
-.env.local
-.env.*.local
+.env.*
 /backend/.env
 
 # Logs

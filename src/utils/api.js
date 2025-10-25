@@ -28,6 +28,12 @@ export async function getMe() {
   return res.data;
 }
 
+// Users
+export async function updateProfile(payload) {
+  const res = await api.patch('/users/update-profile', payload);
+  return res.data;
+}
+
 // Events
 export async function getEvents() {
   const res = await api.get('/events');
@@ -38,17 +44,21 @@ export async function createEvent(payload) {
   return res.data;
 }
 
-// Global chat REST helpers (new)
+// Global chat REST helpers
 export async function getGlobalMessages() {
-  // GET /messages/global-chat  -> returns { messages: [...] } or similar
   const res = await api.get('/messages/global-chat');
-  // adapt if your backend uses a different shape
   return res.data.messages ?? res.data;
 }
 
+// Post a global message
 export async function postGlobalMessage(message) {
-  // POST /messages/global-chat
   const res = await api.post('/messages/global-chat', message);
+  return res.data;
+}
+
+// Delete a global message
+export async function deleteGlobalMessage(messageId) {
+  const res = await api.delete(`/messages/global-chat/${messageId}`);
   return res.data;
 }
 
