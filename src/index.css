@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: 'Montserrat';
-  src: url('fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
+  src: url('/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -11,6 +11,11 @@ body {
   padding: 0;
   margin: auto;
   font-family: "Montserrat", sans-serif;
+  @apply bg-white text-gray-900; /* Default light mode styles */
+}
+
+.dark body {
+  @apply bg-gray-900 text-gray-100; /* Dark mode styles */
 }
 
 .footer-links a:hover {

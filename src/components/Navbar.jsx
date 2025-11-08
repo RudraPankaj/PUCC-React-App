@@ -2,17 +2,20 @@ import React, { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AuthContext } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { userData, logout } = useContext(AuthContext);
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const ddRef = useRef();
 
   const menuItems = [
     { label: "Home", to: "/" },
     { label: "News", to: "/news" },
+    { label: "Events", to: "/events" },
     { label: "Contact", to: "/contact" },
     { label: "About", to: "/about" },
   ];
@@ -65,6 +68,13 @@ function Navbar() {
 
         {/* Desktop Auth / Dashboard + Profile Dropdown */}
         <div className="hidden md:flex flex-row items-center gap-4 relative" ref={ddRef}>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
+            title="Toggle theme"
+          >
+            <i className={`bi ${theme === 'light' ? 'bi-moon-fill' : 'bi-sun-fill'} text-lg`} />
+          </button>
           {userData ? (
             <>
               <Link
@@ -160,6 +170,14 @@ function Navbar() {
             ))}
 
             <hr className="border-white/40 my-2" />
+
+            <button
+              onClick={() => { toggleTheme(); setIsOpen(false); }}
+              className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#005080] transition-all text-white"
+            >
+              <i className={`bi ${theme === 'light' ? 'bi-moon-fill' : 'bi-sun-fill'} text-lg`} />
+              <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            </button>
 
             {userData ? (
               <>
