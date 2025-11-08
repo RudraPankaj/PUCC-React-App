@@ -55,7 +55,7 @@ function AnnouncementCard({ announcement, isExecutive, onEditClick, onDeleteClic
       )}
       <div className="flex items-start gap-4">
         <div>
-          <i className="bi bi-mic-fill text-2xl" />
+          <i className="bi bi-megaphone-fill text-2xl" />
         </div>
         <div className="flex-1">
           <p className="font-medium" style={{ whiteSpace: 'pre-wrap' }}>{text}</p>
