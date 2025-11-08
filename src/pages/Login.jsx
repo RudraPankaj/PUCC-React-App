@@ -1,48 +1,35 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext.jsx'
-import { login as apiLogin } from '../utils/api.js'
-import { parseApiError, setToken } from '../utils/helpers.js'
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext.jsx';
+import { useNotification } from '../context/NotificationContext.jsx';
+import { login as apiLogin } from '../utils/api.js';
+import { parseApiError, setToken } from '../utils/helpers.js';
 
-import Navbar from '../components/Navbar.jsx'
-import Footer from '../components/Footer.jsx'
-import AlertModal from '../components/AlertModal.jsx'
+import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
 
 function Login() {
-  
   const navigate = useNavigate();
   const { isLoggedIn, login, userRole } = useContext(AuthContext);
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({ email: '', password: '', role: 'member' });
 
-  const [modalState, setModalState] = useState({
-    show: false,
-    type: '', // 'success' or 'error'
-    message: ''
-  });
-
-  const handleCloseModal = () => {
-      setModalState({ show: false, type: '', message: '' });
-  };
-
   useEffect(() => {
-    if(isLoggedIn) {
-      navigate('/dashboard/'+userRole, { replace: true });
+    if (isLoggedIn) {
+      navigate('/dashboard/' + userRole + '/profile', { replace: true });
     }
   }, [isLoggedIn, userRole, navigate]);
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const data = await apiLogin(formData);
-      // persist token
       setToken(data.token);
-      // normalize role to lowercase to match router paths (dashboard/member etc.)
       const normalizedRole = (data.user?.role || '').toString().toLowerCase() || 'member';
       const authPayload = {
         user: data.user,
@@ -50,13 +37,13 @@ function Login() {
         token: data.token,
       };
 
-      login(authPayload); // set isLoggedIn, userRole, userData and persist userAuthData
-      navigate(`/dashboard/${authPayload.role}`, { replace: true });
+      login(authPayload);
+      addNotification('Logged in successfully!', 'success');
     } catch (err) {
       const message = parseApiError(err);
-      setModalState({show: true, type: 'error', message: message,});
+      addNotification(message, 'error');
     }
-  }
+  };
 
   return (
     <>
@@ -68,7 +55,7 @@ function Login() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="flex justify-center gap-3 mb-8">
-              {['executive','member','instructor'].map(role => (
+              {['executive', 'member', 'instructor'].map(role => (
                 <label key={role}>
                   <input
                     type="radio"
@@ -112,7 +99,7 @@ function Login() {
             </div>
             <button
               type="submit"
-              className="w-full py-2 bg-[#0067b6] text-white font-semibold rounded-lg hover:bg-[#0057b6] transition cursor-pointer"
+              className="w-full py-2 bg-brand-blue-dark text-white font-semibold rounded-lg hover:bg-brand-blue-hover-dark transition cursor-pointer"
             >
               Login
             </button>
@@ -122,18 +109,11 @@ function Login() {
             New to PUCC? <Link to="/register" className="text-[#0076b6]">Register here</Link>
           </div>
         </div>
-
-        <AlertModal
-            show={modalState.show}
-            type={modalState.type}
-            message={modalState.message}
-            onClose={handleCloseModal}
-        />
       </div>
 
       <Footer />
     </>
-  )
+  );
 }
 
-export default Login
+export default Login;
