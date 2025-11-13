@@ -11,13 +11,13 @@ const committee = [
 const CommitteeSection = () => {
   const { theme } = useTheme();
   return (
-    <section className={`py-20 px-8 md:px-20 ${theme === 'dark' ? 'bg-gray-950' : 'bg-bg-primary'}`}>
+    <section className={`py-20 px-8 md:px-20 ${theme === 'dark' ? 'bg-gray-950' : 'bg-gradient-to-br from-white to-blue-50'}`}>
       <h2 className={`text-4xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-white' : 'text-primary'}`}>
         Executive Committee
       </h2>
       <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
         {committee.map((member, i) => (
-          <div key={i} className={`text-center p-4 rounded-lg shadow-lg hover:scale-105 transition ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-bg-primary'}`}>
+          <div key={i} className={`text-center p-4 rounded-lg shadow-lg hover:scale-105 transition ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-white'}`}>
             <img 
               src={member.photo} 
               alt={member.name} 

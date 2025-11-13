@@ -34,7 +34,7 @@ function AnnouncementCard({ announcement, isExecutive, onEditClick, onDeleteClic
   };
 
   return (
-    <div style={cardStyle} className="rounded-lg shadow-lg p-4 relative group text-white">
+    <div style={cardStyle} className="rounded-lg shadow-lg p-4 relative group text-white dark:text-gray-100">
       {isExecutive && (
         <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -55,7 +55,7 @@ function AnnouncementCard({ announcement, isExecutive, onEditClick, onDeleteClic
       )}
       <div className="flex items-start gap-4">
         <div>
-          <i className="bi bi-megaphone-fill text-2xl" />
+          <i className="bi bi-bullhorn-fill text-2xl" />
         </div>
         <div className="flex-1">
           <p className="font-medium" style={{ whiteSpace: 'pre-wrap' }}>{text}</p>

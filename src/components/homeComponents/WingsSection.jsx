@@ -16,7 +16,7 @@ const wings = [
         color: "text-success",
     },
     {
-        name: "Linux Networking",
+        name: "Linux Based Networking",
         icon: "bi-diagram-3",
         description: "Explore servers, networking, and system management.",
         color: "text-warning",
@@ -32,15 +32,19 @@ const wings = [
 const WingsSection = () => {
     const { theme } = useTheme();
     return (
-        <section className={`py-20 px-8 md:px-20 ${theme === 'dark' ? 'bg-gray-950' : 'bg-bg-primary'}`}>
-            <h2 className={`text-4xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-white' : 'text-primary'}`}>
+        <section className={`py-20 px-8 md:px-20 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
+            <h2 className={`text-4xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-white' : 'text-[#0067b6]'}`}>
                 Our Wings
             </h2>
             <div className="grid md:grid-cols-4 gap-8">
                 {wings.map((wing, i) => (
                     <div
                         key={i}
-                        className={`p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 border-t-4 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 border-gray-700' : 'bg-bg-primary border-primary'}`}
+                        className={`p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 border-t-4 ${
+                            theme === 'dark' 
+                                ? 'bg-gray-800 text-gray-200 border-gray-700' 
+                                : 'bg-gray-50 border-t-[#0067b6]'
+                        }`}
                     >
                         <div className="flex justify-center mb-5">
                             <i
@@ -49,14 +53,26 @@ const WingsSection = () => {
                                 aria-label={wing.name}
                             ></i>
                         </div>
-                        <h3 className={`text-2xl font-semibold text-center mb-3 ${theme === 'dark' ? 'text-white' : 'text-text-primary'}`}>
+                        <h3 className={`text-2xl font-semibold text-center mb-3 ${
+                            theme === 'dark' 
+                                ? 'text-white' 
+                                : 'text-[#0067b6]'
+                        }`}>
                             {wing.name}
                         </h3>
-                        <p className={`text-center text-lg min-h-30 ${theme === 'dark' ? 'text-gray-400' : 'text-text-secondary'}`}>{wing.description}</p>
+                        <p className={`text-center text-lg min-h-30 ${
+                            theme === 'dark' 
+                                ? 'text-gray-400' 
+                                : 'text-gray-600'
+                        }`}>{wing.description}</p>
                         <div className="flex justify-center mt-6">
                             <a
                                 href="#"
-                                className={`hover:underline font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-primary hover:text-primary-darker' : 'text-primary hover:text-primary-darker'}`}
+                                className={`font-medium flex items-center gap-1 hover:underline ${
+                                    theme === 'dark' 
+                                        ? 'text-blue-400' 
+                                        : 'text-[#0067b6]'
+                                }`}
                             >
                                 See more
                                 <i className="bi bi-arrow-right"></i>

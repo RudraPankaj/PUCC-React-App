@@ -13,11 +13,14 @@ export const AuthProvider = ({ children }) => {
     // Login function
     const login = (data) => {
         setIsLoggedIn(true);
-        // ensure stored role is normalized
-        setUserRole(data.role?.toString().toLowerCase() ?? null);
+        const role = data.role?.toString().toLowerCase() ?? null;
+        setUserRole(role);
         setUserData(data.user);
         localStorage.setItem('userAuthData', JSON.stringify(data));
-        if (data.token) localStorage.setItem('token', data.token);
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+        }
+        console.log("AuthContext: User logged in.");
     };
 
     // Logout function
@@ -27,37 +30,38 @@ export const AuthProvider = ({ children }) => {
         setUserData(null);
         localStorage.removeItem('userAuthData');
         localStorage.removeItem('token');
+        console.log("AuthContext: User logged out.");
     };
 
     useEffect(() => {
-        const storedData = localStorage.getItem('userAuthData');
         const token = localStorage.getItem('token');
         setIsAuthLoading(true);
 
         if (token) {
             getMe()
                 .then(res => {
-                    const data = { user: res.user, role: res.user.role?.toString().toLowerCase(), token };
+                    const roleFromMe = res.user.role?.toString().toLowerCase();
+                    const data = { user: res.user, role: roleFromMe, token };
                     login(data);
+                    console.log("AuthContext: getMe resolved. User role:", roleFromMe);
                 })
                 .catch(() => {
                     // invalid/expired Token: clear stored auth
                     clearAuth();
+                    console.log("AuthContext: getMe failed or token invalid. Clearing auth.");
                 })
-                .finally(() => setIsAuthLoading(false));
+                .finally(() => {
+                    setIsAuthLoading(false);
+                    console.log("AuthContext: isAuthLoading set to false after getMe.");
+                });
             return;
         }
 
-        // No token: fall back to storedData if present (best-effort)
-        if (storedData) {
-            try {
-                login(JSON.parse(storedData));
-            } catch {
-                localStorage.removeItem('userAuthData');
-            }
-        }
         setIsAuthLoading(false);
+        console.log("AuthContext: No token found. Not logged in. isAuthLoading set to false.");
     }, []);
+
+    console.log("AuthContext: Rendering provider. isLoggedIn:", isLoggedIn, "userRole:", userRole, "isAuthLoading:", isAuthLoading, "userData:", userData);
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, userRole, userData, setUserData, login, logout, isAuthLoading }}>

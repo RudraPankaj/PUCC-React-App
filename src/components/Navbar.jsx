@@ -2,7 +2,7 @@ import React, { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AuthContext } from "../context/AuthContext.jsx";
-import { useTheme } from "../context/ThemeContext.jsx";
+import { useTheme } from "../hooks/useTheme.jsx";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,8 +19,6 @@ function Navbar() {
     { label: "Contact", to: "/contact" },
     { label: "About", to: "/about" },
   ];
-
-  const NAVBAR_HEIGHT = 56;
 
   const getDashboardLink = () => {
     const role = userData?.role || "guest";
@@ -46,10 +44,10 @@ function Navbar() {
   return (
     <>
       {/* Top Navbar */}
-      <div className="fixed top-0 left-0 w-full z-50 flex flex-row justify-between items-center px-6 py-3 bg-gradient-to-r from-[#00aae4] to-[#0067b6] shadow-lg">
+      <div className={`fixed top-0 left-0 w-full z-50 flex flex-row justify-between items-center px-6 py-3 shadow-lg ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-r from-[#00aae4] to-[#0067b6] text-white'}`}>
         {/* Logo + Desktop Nav */}
         <div className="flex flex-row gap-8 items-center">
-          <div className="text-3xl text-white font-extrabold tracking-wide mr-2 select-none drop-shadow-lg">
+          <div className={`text-3xl font-extrabold tracking-wide mr-2 select-none drop-shadow-lg ${theme === 'dark' ? 'text-white' : 'text-white'}`}>
             PUCC
           </div>
 
@@ -57,29 +55,40 @@ function Navbar() {
           <nav className="hidden md:flex flex-row gap-2">
             {menuItems.map((item) => (
               <Link key={item.label} to={item.to} className="relative group">
-                <span className="px-4 py-2 rounded-sm text-white font-medium transition-all duration-200 group-hover:bg-white group-hover:text-[#00aae4] group-hover:shadow-md">
+                <span className={`px-4 py-2 rounded-sm font-medium transition-all duration-200 group-hover:shadow-md ${theme === 'dark' ? 'text-gray-300 group-hover:bg-gray-700 group-hover:text-white' : 'text-white group-hover:bg-white group-hover:text-[#00aae4]'}`}>
                   {item.label}
                 </span>
-                <span className="absolute left-0 -bottom-1.5 w-0 h-1 bg-white rounded transition-all duration-300 group-hover:w-full"></span>
+                <span className={`absolute left-0 -bottom-1.5 w-0 h-1 rounded transition-all duration-300 group-hover:w-full ${theme === 'dark' ? 'bg-white' : 'bg-white'}`}></span>
               </Link>
             ))}
           </nav>
         </div>
 
         {/* Desktop Auth / Dashboard + Profile Dropdown */}
-        <div className="hidden md:flex flex-row items-center gap-4 relative" ref={ddRef}>
+        <div
+          className="hidden md:flex flex-row items-center gap-4 relative"
+          ref={ddRef}
+        >
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
+            className="py-2 px-3 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
             title="Toggle theme"
           >
-            <i className={`bi ${theme === 'light' ? 'bi-moon-fill' : 'bi-sun-fill'} text-lg`} />
+            <i
+              className={`bi ${
+                theme === "light" ? "bi-moon-fill" : "bi-sun-fill"
+              } text-lg`}
+            />
           </button>
           {userData ? (
             <>
               <Link
                 to={getDashboardLink()}
-                className="px-4 py-2 rounded-md bg-white text-[#00aae4] font-semibold hover:bg-[#caf0f8] transition-all duration-200 shadow"
+                className={`px-4 py-2 rounded-md font-semibold transition-all duration-200 shadow ${
+                  theme === "dark"
+                    ? "bg-bg-secondary text-text-primary hover:bg-gray-600"
+                    : "bg-primary text-white hover:bg-primary-darker"
+                }`}
               >
                 Go to Dashboard
               </Link>
@@ -97,17 +106,19 @@ function Navbar() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-14 w-44 bg-white text-black rounded shadow-lg ring-1 ring-black/10 overflow-hidden z-50">
+                <div
+                  className={`absolute right-0 mt-12 w-48 rounded shadow-lg ring-1 ring-black/10 overflow-hidden ${theme === 'dark' ? 'bg-gray-800 text-text-primary ring-gray-600' : 'bg-white text-black ring-black/10'}`}
+                >
                   <Link
-                    to="/dashboard/profile"
-                    className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                    to="/dashboard/settings"
+                    className={`block px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
                     onClick={() => setDropdownOpen(false)}
                   >
                     Settings
                   </Link>
                   <button
                     onClick={doLogout}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                    className={`w-full text-left px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
                   >
                     Logout
                   </button>
@@ -118,13 +129,21 @@ function Navbar() {
             <>
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-md text-white border border-white hover:bg-white hover:text-[#00aae4] font-semibold transition-all duration-200 shadow"
+                className={`px-4 py-2 rounded-md border font-semibold transition-all duration-200 shadow ${
+                  theme === "dark"
+                    ? "border-border-color text-text-secondary hover:bg-bg-secondary hover:text-text-primary"
+                    : "text-white border-white hover:bg-white/20 hover:text-white"
+                }`}
               >
                 Login
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 rounded-md bg-white text-[#00aae4] font-semibold hover:bg-[#caf0f8] transition-all duration-200 shadow"
+                className={`px-4 py-2 rounded-md font-semibold transition-all duration-200 shadow ${
+                  theme === "dark"
+                    ? "bg-primary text-white hover:bg-primary-darker"
+                    : "bg-white text-[#00aae4] hover:bg-[#caf0f8]"
+                }`}
               >
                 Register
               </Link>
@@ -133,7 +152,10 @@ function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+        <button
+          className="md:hidden text-white"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
@@ -145,38 +167,56 @@ function Navbar() {
         }`}
       >
         <div
-          className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`absolute inset-0 backdrop-blur-sm transition-opacity duration-300 ${
             isOpen ? "opacity-100" : "opacity-0"
-          }`}
+          } ${theme === "dark" ? "bg-black/50" : "bg-black/30"}`}
           onClick={() => setIsOpen(false)}
         />
 
         <div
-          className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-[#00aae4] to-[#0067b6] shadow-lg z-50 transition-transform duration-300 ${
+          className={`fixed top-0 left-0 h-full w-64 shadow-lg z-50 transition-transform duration-300 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-          style={{ paddingTop: NAVBAR_HEIGHT }}
+          } ${
+            theme === "dark"
+              ? "bg-gray-800 text-gray-200"
+              : "bg-gradient-to-r from-[#00aae4] to-[#0067b6] text-white"
+          } pt-14`}
         >
-          <div className="flex flex-col px-6 py-4 space-y-2 text-white text-lg">
+          <div className="flex flex-col px-6 py-4 space-y-2 text-lg">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.to}
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-[#005080] px-4 py-2 rounded transition-all"
+                className={`px-4 py-2 rounded transition-all ${
+                  theme === "dark" ? "hover:bg-gray-700" : "hover:bg-brand-blue-hover-dark"
+                }`}
               >
                 {item.label}
               </Link>
             ))}
 
-            <hr className="border-white/40 my-2" />
+            <hr
+              className={`my-2 ${
+                theme === "dark" ? "border-gray-600" : "border-white/40"
+              }`}
+            />
 
             <button
-              onClick={() => { toggleTheme(); setIsOpen(false); }}
-              className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#005080] transition-all text-white"
+              onClick={() => {
+                toggleTheme();
+                setIsOpen(false);
+              }}
+              className={`flex items-center gap-3 px-4 py-2 rounded-md transition-all ${
+                theme === "dark" ? "hover:bg-bg-secondary" : "hover:bg-brand-blue-hover-dark"
+              }`}
             >
-              <i className={`bi ${theme === 'light' ? 'bi-moon-fill' : 'bi-sun-fill'} text-lg`} />
-              <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+              <i
+                className={`bi ${
+                  theme === "light" ? "bi-moon-fill" : "bi-sun-fill"
+                } text-lg`}
+              />
+              <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
             </button>
 
             {userData ? (
@@ -184,24 +224,38 @@ function Navbar() {
                 <Link
                   to={getDashboardLink()}
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 rounded-md bg-white text-[#00aae4] hover:bg-[#caf0f8] transition-all"
+                  className={`px-4 py-2 rounded-md transition-all ${
+                    theme === "dark"
+                      ? "bg-primary text-white hover:bg-primary-darker"
+                      : "bg-white text-primary hover:bg-[#caf0f8]"
+                  }`}
                 >
                   Go to Dashboard
                 </Link>
                 <div className="flex items-center gap-3 pt-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow">
+                  <div
+                    className={`w-10 h-10 rounded-full overflow-hidden border-2 shadow ${
+                      theme === "dark" ? "border-border-color" : "border-white"
+                    }`}
+                  >
                     <img
                       src={userData.profileimgurl || "/icons/pucc.png"}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <span className="text-sm font-medium">{userData.username}</span>
+                  <span className="text-sm font-medium">
+                    {userData.username}
+                  </span>
                 </div>
                 <Link
                   to="/dashboard/profile"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2 mt-3 bg-white text-[#00aae4] rounded-md hover:bg-[#caf0f8] text-sm"
+                  className={`block px-4 py-2 mt-3 rounded-md text-sm ${
+                    theme === "dark"
+                      ? "bg-primary text-white hover:bg-primary-darker"
+                      : "bg-white text-primary hover:bg-[#caf0f8]"
+                  }`}
                 >
                   Settings
                 </Link>
@@ -210,7 +264,11 @@ function Navbar() {
                     doLogout();
                     setIsOpen(false);
                   }}
-                  className="block px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                  className={`block px-4 py-2 rounded-md text-sm ${
+                    theme === "dark"
+                      ? "bg-error text-white hover:bg-red-700"
+                      : "bg-red-500 text-white hover:bg-red-600"
+                  }`}
                 >
                   Logout
                 </button>
@@ -220,14 +278,22 @@ function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 rounded-md border border-white hover:bg-[#005080] transition-all"
+                  className={`px-4 py-2 rounded-md border transition-all ${
+                    theme === "dark"
+                      ? "border-border-color hover:bg-bg-secondary"
+                      : "border-white hover:bg-white/20"
+                  }`}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 rounded-md bg-white text-[#00aae4] hover:bg-[#caf0f8] transition-all"
+                  className={`px-4 py-2 rounded-md border transition-all ${
+                    theme === "dark"
+                      ? "bg-primary text-white hover:bg-primary-darker"
+                      : "bg-white text-[#00aae4] hover:bg-[#caf0f8]"
+                  }`}
                 >
                   Register
                 </Link>

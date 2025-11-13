@@ -1,10 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getEvents, createEvent } from '../../../utils/api.js';
+import { getEvents, createEvent, deleteEvent } from '../../../utils/api.js';
 import { AuthContext } from '../../../context/AuthContext.jsx';
+import { useNotification } from '../../../context/NotificationContext.jsx';
+import { useTheme } from '../../../hooks/useTheme.jsx';
+import EventEditSection from './EventEditSection.jsx';
+import EventCardSkeleton from '../../EventCardSkeleton.jsx';
 
-function EventCard({ e }) {
+function EventCard({ e, isExecutive, onEditClick, onDeleteClick }) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const format_date = (d) => (d ? new Date(d).toLocaleDateString() : '-');
   const truncate = (text, length = 80) => {
     if (!text) return '';
@@ -16,12 +21,42 @@ function EventCard({ e }) {
     if (id) navigate(`/eventdetails/${id}`);
   };
 
+  const handleEdit = (event) => {
+    event.stopPropagation();
+    onEditClick(e);
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+    onDeleteClick(e);
+  };
+
   return (
     <div
       role="button"
       onClick={goDetails}
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 cursor-pointer group"
+      className={`rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 cursor-pointer group relative ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}
     >
+      {/* Edit and Delete buttons for executives */}
+      {isExecutive && (
+        <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={handleEdit}
+            className={`p-2 rounded-full shadow-md transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-blue-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-[#0067b6]'}`}
+            title="Edit event"
+          >
+            <i className="bi bi-pencil-fill text-sm" />
+          </button>
+          <button
+            onClick={handleDelete}
+            className={`p-2 rounded-full shadow-md transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-red-500' : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-red-600'}`}
+            title="Delete event"
+          >
+            <i className="bi bi-trash-fill text-sm" />
+          </button>
+        </div>
+      )}
+
       {e.image && (
         <div className="relative mb-3">
           <img
@@ -35,25 +70,25 @@ function EventCard({ e }) {
         </div>
       )}
 
-      <h3 className="font-semibold text-base leading-tight mb-2 group-hover:text-[#005a9c]">
+      <h3 className={`font-semibold text-base leading-tight mb-2 ${theme === 'dark' ? 'text-gray-200 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-[#005a9c]'}`}>
         {e.title}
       </h3>
 
-      <p className="flex items-center gap-1 text-xs text-[#0067b6] font-semibold">
+      <p className={`flex items-center gap-1 text-xs font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-[#0067b6]'}`}>
         <i className="bi bi-calendar-event mr-1" /> {format_date(e.date)}
       </p>
-      <p className="flex items-center gap-1 text-xs text-gray-500 font-semibold">
+      <p className={`flex items-center gap-1 text-xs font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
         <i className="bi bi-person mr-1" /> {e.publishedBy}
       </p>
       {e.lastRegistrationDate && (
-        <p className="flex items-center gap-1 text-xs text-gray-500 font-semibold">
+        <p className={`flex items-center gap-1 text-xs font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
           <i className="bi bi-clock mr-1" /> Last reg: {format_date(e.lastRegistrationDate)}
         </p>
       )}
 
-      <p className="mt-2 text-sm text-gray-700">
+      <p className={`mt-2 text-sm whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
         {truncate(e.summary)}
-        <span className="text-[#0067b6] text-xs ml-1 underline-offset-2 group-hover:underline">
+        <span className={`text-xs ml-1 underline-offset-2 group-hover:underline ${theme === 'dark' ? 'text-blue-400' : 'text-[#0067b6]'}`}>
           See details
         </span>
       </p>
@@ -63,11 +98,16 @@ function EventCard({ e }) {
 
 export default function EventsSection() {
   const { userData } = useContext(AuthContext);
+  const { addNotification } = useNotification();
+  const { theme } = useTheme();
   const isExecutive = (userData?.role || '').toLowerCase() === 'executive';
 
   const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -80,9 +120,11 @@ export default function EventsSection() {
   });
 
   useEffect(() => {
+    setIsLoading(true);
     getEvents()
       .then((res) => setEvents(res.events || []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -108,20 +150,54 @@ export default function EventsSection() {
           wing: 'All',
         });
         setShowCreateForm(false);
+        addNotification('Event published successfully!', 'success');
       }
     } catch (err) {
       console.error(err);
+      addNotification('Failed to publish event.', 'error');
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleEditClick = (event) => {
+    setEditingEvent(event);
+    setShowEditModal(true);
+  };
+
+  const handleEventUpdated = (updatedEvent) => {
+    setEvents((prev) =>
+      prev.map((ev) => 
+        (ev._id || ev.id) === (updatedEvent._id || updatedEvent.id) 
+          ? updatedEvent 
+          : ev
+      )
+    );
+    setShowEditModal(false);
+    setEditingEvent(null);
+    addNotification('Event updated successfully!', 'success');
+  };
+
+  const handleDeleteClick = async (eventToDelete) => {
+    if (window.confirm(`Are you sure you want to delete the event "${eventToDelete.title}"?`)) {
+      try {
+        const eventId = eventToDelete._id || eventToDelete.id;
+        await deleteEvent(eventId);
+        setEvents((prev) => prev.filter((ev) => (ev._id || ev.id) !== eventId));
+        addNotification('Event deleted successfully!', 'success');
+      } catch (err) {
+        console.error("Failed to delete event:", err);
+        addNotification('Failed to delete event.', 'error');
+      }
     }
   };
 
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Events Timeline</h2>
+        <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Events Timeline</h2>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">{events.length} events</span>
+          <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{events.length} events</span>
           {isExecutive && (
             <button
               type="button"
@@ -137,49 +213,48 @@ export default function EventsSection() {
       {isExecutive && showCreateForm && (
         <form
           onSubmit={publish}
-          className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-8 space-y-4"
+          className={`border rounded-xl shadow-sm p-6 mb-8 space-y-4 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'}`}
         >
-          {/* Title + Event Date */}
+          {/* Form fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Event Title *</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Event Title *</label>
               <input
                 value={form.title}
                 onChange={(e) => change('title', e.target.value)}
                 placeholder="Enter event name"
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
                 required
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Event Date</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Event Date</label>
               <input
                 value={form.date}
                 onChange={(e) => change('date', e.target.value)}
                 type="date"
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
               />
             </div>
           </div>
 
-          {/* Published By + Wing */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Published By</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Published By</label>
               <input
                 value={form.publishedBy}
                 onChange={(e) => change('publishedBy', e.target.value)}
                 placeholder="Your name or username"
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
                 readOnly
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Wing</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Wing</label>
               <select
                 value={form.wing}
                 onChange={(e) => change('wing', e.target.value)}
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
               >
                 <option>All</option>
                 <option>Competitive Programming</option>
@@ -190,41 +265,38 @@ export default function EventsSection() {
             </div>
           </div>
 
-          {/* Registration Date + Image URL */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Last Registration Date</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Last Registration Date</label>
               <input
                 value={form.lastRegistrationDate}
                 onChange={(e) => change('lastRegistrationDate', e.target.value)}
                 type="date"
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-sm text-gray-600 mb-1">Image URL (optional)</label>
+              <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Image URL (optional)</label>
               <input
                 value={form.image}
                 onChange={(e) => change('image', e.target.value)}
                 placeholder="https://example.com/banner.jpg"
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+                className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
               />
             </div>
           </div>
 
-          {/* Summary */}
           <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-1">Description</label>
+            <label className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Description</label>
             <textarea
               value={form.summary}
               onChange={(e) => change('summary', e.target.value)}
               placeholder="Write a short event summary..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus:border-[#0067b6]"
+              className={`w-full p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0067b6] focus.border-[#0067b6] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
               rows={3}
             />
           </div>
 
-          {/* Publish Button */}
           <div className="flex justify-end">
             <button
               disabled={publishing}
@@ -237,10 +309,35 @@ export default function EventsSection() {
       )}
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {events.map((ev) => (
-          <EventCard key={ev._id || ev.id} e={ev} />
-        ))}
+        {isLoading ? (
+          <>
+            <EventCardSkeleton />
+            <EventCardSkeleton />
+            <EventCardSkeleton />
+          </>
+        ) : (
+          events.map((ev) => (
+            <EventCard 
+              key={ev._id || ev.id} 
+              e={ev} 
+              isExecutive={isExecutive}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          ))
+        )}
       </div>
+
+      {/* Edit Modal */}
+      <EventEditSection
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingEvent(null);
+        }}
+        eventData={editingEvent}
+        onSaved={handleEventUpdated}
+      />
     </section>
   );
 }
